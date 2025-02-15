@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vaccination Records</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f2f5;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+        .container {
+            max-width: 600px;
+            background: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        h2 {
+            text-align: center;
+            color: #007bff;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 5px;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        .button {
+            background-color: #007bff;
+            color: white;
+            padding: 12px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+        }
+        .button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Vaccination Records</h2>
+        <form>
+            <div class="form-group">
+                <label>Patient Name</label>
+                <input type="text" name="patientName" required>
+            </div>
+            <div class="form-group">
+                <label>Age</label>
+                <input type="number" name="age" required>
+            </div>
+            <div class="form-group">
+                <label>Vaccine Name</label>
+                <select name="vaccineName" required>
+                    <option value="">Select Vaccine</option>
+                    <option value="BCG">BCG (Bacillus Calmette-Guérin)</option>
+                    <option value="Hepatitis B">Hepatitis B</option>
+                    <option value="Hepatitis A">Hepatitis A</option>
+                    <option value="OPV">OPV (Oral Polio Vaccine)</option>
+                    <option value="IPV">IPV (Inactivated Polio Vaccine)</option>
+                    <option value="DPT">DPT (Diphtheria, Pertussis, Tetanus)</option>
+                    <option value="Hib">Hib (Haemophilus Influenzae Type B)</option>
+                    <option value="PCV">PCV (Pneumococcal Conjugate Vaccine)</option>
+                    <option value="Rotavirus">Rotavirus Vaccine</option>
+                    <option value="Measles">Measles Vaccine</option>
+                    <option value="MMR">MMR (Measles, Mumps, Rubella)</option>
+                    <option value="Rubella">Rubella Vaccine</option>
+                    <option value="Mumps">Mumps Vaccine</option>
+                    <option value="Varicella">Varicella (Chickenpox) Vaccine</option>
+                    <option value="Influenza">Influenza (Flu) Vaccine</option>
+                    <option value="COVID-19">COVID-19 Vaccine</option>
+                    <option value="Tetanus">Tetanus Vaccine</option>
+                    <option value="Pertussis">Pertussis (Whooping Cough) Vaccine</option>
+                    <option value="HIV">HIV Vaccine (Experimental)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Date of Vaccination</label>
+                <input type="date" name="vaccinationDate" required>
+            </div>
+            <div class="form-group">
+                <label>Notes</label>
+                <textarea name="notes" placeholder="Additional notes"></textarea>
+            </div>
+            <button type="submit" class="button" onclick="alert('Record saved successfully');">Save Record</button>
+        </form>
+    </div>
+</body>
+</html>

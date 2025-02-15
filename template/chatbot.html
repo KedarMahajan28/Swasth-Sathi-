@@ -1,0 +1,231 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gemini AI Chat</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            text-align: center;
+            padding: 20px;
+            background: linear-gradient(to right, #8360c3, #2ebf91);
+            color: white;
+        }
+
+        h2 {
+            font-size: 28px;
+            margin-bottom: 20px;
+        }
+
+        #chatbox {
+            width: 90%;
+            max-width: 1000px;
+            height: 400px;
+            margin: auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+            padding: 15px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .message {
+            max-width: 80%;
+            padding: 10px;
+            border-radius: 10px;
+            margin: 5px 10px;
+            word-wrap: break-word;
+            white-space: pre-wrap;
+        }
+
+        .user {
+            background: #2ebf91;
+            color: white;
+            align-self: flex-end;
+        }
+
+        .bot {
+            background: #8360c3;
+            color: white;
+            align-self: flex-start;
+        }
+
+        .bot b {
+            font-weight: bold;
+            color: yellow;
+        }
+
+        input {
+            width: 50%;
+            padding: 12px;
+            border: none;
+            border-radius: 25px;
+            margin-top: 10px;
+            font-size: 16px;
+            outline: none;
+        }
+
+        button {
+            padding: 12px 20px;
+            border: none;
+            background: linear-gradient(to right, #ff512f, #dd2476);
+            color: white;
+            font-size: 16px;
+            border-radius: 25px;
+            cursor: pointer;
+            margin-left: 10px;
+            transition: 0.3s;
+        }
+
+        button:hover {
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body>
+
+    <h2>💬 SwasthSathi Chatbot</h2>
+
+    <div id="chatbox"></div>
+
+    <input type="text" id="userInput" placeholder="Type your message..." />
+    <button onclick="sendMessage()">Send</button>
+    <button type="button" id="startSpeechRecognition" style="margin-left:3px;border:none; border-radius:20px;">
+        Start Speech Recognition
+    </button>
+    <button type="button" id="stopSpeaking" style="margin-left:3px; border:none; border-radius: 20px; display: none;">
+        Stop Speaking
+    </button>
+
+
+    <script>
+        function sendMessage() {
+            let userInput = document.getElementById("userInput").value;
+            if (userInput.trim() === "") return;
+
+            displayMessage("You", userInput, "user");
+
+            fetch("/chat", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ message: userInput })
+            })
+            .then(response => response.json())
+            .then(data => {
+                let formattedResponse = formatGeminiResponse(data.response);
+                displayMessage("Gemini AI", formattedResponse, "bot");
+            })
+            .catch(error => {
+                console.error("Error:", error);
+                displayMessage("System", "Error communicating with the server.", "bot");
+            });
+
+            document.getElementById("userInput").value = "";
+        }
+
+        function formatGeminiResponse(response) {
+            response = response.replace(/\n/g, "<br>");
+            response = response.replace(/\*\*([^*]+)\*\*/g, "<b>$1</b>");
+            response = response.replace(/\*([^*]+)\*/g, "<i>$1</i>");
+            return response;
+        }
+
+        function displayMessage(sender, message, type) {
+            let chatbox = document.getElementById("chatbox");
+            let msgDiv = document.createElement("div");
+            msgDiv.classList.add("message", type);
+            msgDiv.innerHTML = `<b>${sender}:</b> ${message}`;
+
+            if (type === "bot") {
+                let speakButton = document.createElement("button");
+                speakButton.textContent = "Speak";
+                speakButton.style.marginLeft = "5px";
+                speakButton.style.borderRadius = "20px";
+                speakButton.addEventListener("click", () => speakText(message));
+                msgDiv.appendChild(speakButton);
+            }
+
+            chatbox.appendChild(msgDiv);
+            chatbox.scrollTop = chatbox.scrollHeight;
+        }
+
+        let isSpeaking = false;
+        const stopSpeakingButton = document.getElementById("stopSpeaking");
+
+        function speakText(text) {
+            const synth = window.speechSynthesis;
+
+            if ('speechSynthesis' in window) {
+                const utterance = new SpeechSynthesisUtterance(text);
+
+                utterance.onstart = () => {
+                    isSpeaking = true;
+                    stopSpeakingButton.style.display = "inline-block";
+                };
+
+                utterance.onend = () => {
+                    isSpeaking = false;
+                    stopSpeakingButton.style.display = "none";
+                };
+
+                utterance.onerror = (event) => {
+                    console.error("Speech synthesis error:", event.error);
+                    isSpeaking = false;
+                    stopSpeakingButton.style.display = "none";
+                };
+
+                synth.speak(utterance);
+            } else {
+                console.error("Speech synthesis is not supported in this browser.");
+                displayMessage("System", "Text-to-speech is not supported in this browser.", "bot");
+            }
+        }
+
+        stopSpeakingButton.addEventListener("click", () => {
+            if (isSpeaking && 'speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                isSpeaking = false;
+                stopSpeakingButton.style.display = "none";
+            }
+        });
+
+        const startSpeechRecognitionButton = document.getElementById('startSpeechRecognition');
+        const userInputField = document.getElementById('userInput');
+
+        startSpeechRecognitionButton.addEventListener('click', startSpeechRecognition);
+
+        function startSpeechRecognition() {
+            const recognition = new webkitSpeechRecognition() || new SpeechRecognition();
+            recognition.lang = 'en-US';
+
+            recognition.onresult = function (event) {
+                const result = event.results[0][0].transcript;
+                userInputField.value = result;
+                sendMessage();
+            };
+
+            recognition.onend = function () {
+                console.log('Speech recognition ended.');
+            };
+
+            recognition.onerror = function (event) {
+                console.error("Speech recognition error:", event.error);
+                let errorMessage = "Speech recognition error. Please try again.";
+                if (event.error === 'no-speech') {
+                    errorMessage = "No speech detected. Please try again.";
+                } else if (event.error === 'audio-capture') {
+                    errorMessage = "Could not capture audio. Check your microphone.";
+                }
+                displayMessage("System", errorMessage, "bot");
+            };
+
+            recognition.start();
+        }
+    </script>
+
+</body>
+</html>
